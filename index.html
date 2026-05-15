@@ -95,6 +95,12 @@
       font-size:38px;
     }
 
+    .card p{
+      margin-top:8px;
+      font-size:14px;
+      color:#777;
+    }
+
     .grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
@@ -209,16 +215,19 @@
     <div class="card">
       <h3>For Registration</h3>
       <h2 id="forReg" style="color:#4CAF50;">0</h2>
+      <p id="forRegPercent"></p>
     </div>
 
     <div class="card">
       <h3>Not For Registration</h3>
       <h2 id="notForReg" style="color:#ff8a80;">0</h2>
+      <p id="notForRegPercent"></p>
     </div>
 
     <div class="card">
       <h3>Not Yet Validated</h3>
       <h2 id="notYetValidated" style="color:#9e9e9e;">0</h2>
+      <p id="notYetValidatedPercent"></p>
     </div>
 
   </div>
@@ -558,6 +567,11 @@ function updateDashboard(data) {
 
   });
 
+  const grandTotal =
+    totalForReg +
+    totalNotForReg +
+    totalNotYetValidated;
+
   document.getElementById('forReg').innerText =
     totalForReg.toLocaleString();
 
@@ -568,11 +582,25 @@ function updateDashboard(data) {
     totalNotYetValidated.toLocaleString();
 
   document.getElementById('totalHH').innerText =
-    (
-      totalForReg +
-      totalNotForReg +
-      totalNotYetValidated
-    ).toLocaleString();
+    grandTotal.toLocaleString();
+
+  const forRegPercent =
+    ((totalForReg / grandTotal) * 100).toFixed(1);
+
+  const notForRegPercent =
+    ((totalNotForReg / grandTotal) * 100).toFixed(1);
+
+  const notYetValidatedPercent =
+    ((totalNotYetValidated / grandTotal) * 100).toFixed(1);
+
+  document.getElementById('forRegPercent').innerText =
+    `${forRegPercent}% of total households`;
+
+  document.getElementById('notForRegPercent').innerText =
+    `${notForRegPercent}% of total households`;
+
+  document.getElementById('notYetValidatedPercent').innerText =
+    `${notYetValidatedPercent}% of total households`;
 
   renderMunicipalityChart(
     municipalities,
