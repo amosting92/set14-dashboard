@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,6 +41,34 @@
       border-radius:12px;
       box-shadow:0 2px 8px rgba(0,0,0,0.08);
       font-size:13px;
+    }
+
+    .filters{
+      display:flex;
+      gap:15px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .filter-box{
+      background:white;
+      padding:15px;
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .filter-box label{
+      display:block;
+      margin-bottom:8px;
+      font-size:13px;
+      color:#666;
+    }
+
+    .filter-box select{
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      min-width:220px;
     }
 
     .cards{
@@ -126,6 +153,7 @@
     }
 
   </style>
+
 </head>
 
 <body>
@@ -142,6 +170,22 @@
   </div>
 
   <div class="error" id="errorBox"></div>
+
+  <div class="filters">
+
+    <div class="filter-box">
+
+      <label>Municipality</label>
+
+      <select id="municipalityFilter">
+
+        <option value="ALL">All Municipalities</option>
+
+      </select>
+
+    </div>
+
+  </div>
 
   <div class="cards">
 
@@ -223,7 +267,8 @@
 
 <script>
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxLO7R1kul50MExn85v14BHUsfuksw0bYpg-5oYPy1hIu2k6PLnIsJTd1oMagXwF_2N/exec';
+const API_URL =
+'https://script.google.com/macros/s/AKfycbxLO7R1kul50MExn85v14BHUsfuksw0bYpg-5oYPy1hIu2k6PLnIsJTd1oMagXwF_2N/exec';
 
 let municipalityChart;
 let statusChart;
@@ -246,14 +291,27 @@ async function loadDashboard() {
 
     const data = rawData.filter(item => {
 
-      const municipality = String(item.municipality || '').trim();
+      const municipality =
+        String(item.municipality || '').trim();
 
       return municipality !== '' &&
              municipality.toLowerCase() !== 'grand total';
 
     });
 
-    updateDashboard(data);
+    populateMunicipalityFilter(data);
+
+    const selectedMunicipality =
+      document.getElementById('municipalityFilter').value;
+
+    const filteredData =
+      selectedMunicipality === 'ALL'
+        ? data
+        : data.filter(item =>
+            item.municipality === selectedMunicipality
+          );
+
+    updateDashboard(filteredData);
 
     document.getElementById('updatedTime').innerText =
       new Date().toLocaleString();
@@ -268,6 +326,31 @@ async function loadDashboard() {
 
 }
 
+function populateMunicipalityFilter(data) {
+
+  const select =
+    document.getElementById('municipalityFilter');
+
+  if (select.options.length > 1) {
+    return;
+  }
+
+  data.forEach(item => {
+
+    const option = document.createElement('option');
+
+    option.value = item.municipality;
+
+    option.textContent = item.municipality;
+
+    select.appendChild(option);
+
+  });
+
+  select.addEventListener('change', loadDashboard);
+
+}
+
 function updateDashboard(data) {
 
   const municipalities = [];
@@ -279,7 +362,8 @@ function updateDashboard(data) {
   let totalNotForReg = 0;
   let totalNotYetValidated = 0;
 
-  const tableBody = document.getElementById('tableBody');
+  const tableBody =
+    document.getElementById('tableBody');
 
   tableBody.innerHTML = '';
 
@@ -302,11 +386,17 @@ function updateDashboard(data) {
 
     const municipality = item.municipality;
 
-    const forReg = parseNumber(item.forReg);
-    const notForReg = parseNumber(item.notForReg);
-    const notYetValidated = parseNumber(item.notYetValidated);
+    const forReg =
+      parseNumber(item.forReg);
 
-    const total = forReg + notForReg + notYetValidated;
+    const notForReg =
+      parseNumber(item.notForReg);
+
+    const notYetValidated =
+      parseNumber(item.notYetValidated);
+
+    const total =
+      forReg + notForReg + notYetValidated;
 
     municipalities.push(municipality);
 
@@ -318,16 +408,32 @@ function updateDashboard(data) {
     totalNotForReg += notForReg;
     totalNotYetValidated += notYetValidated;
 
-    nfrTotals.duplicate += parseNumber(item.duplicate);
-    nfrTotals.nasChildren += parseNumber(item.nasChildren);
-    nfrTotals.noEligible += parseNumber(item.noEligible);
-    nfrTotals.notInterested += parseNumber(item.notInterested);
-    nfrTotals.unlocated += parseNumber(item.unlocated);
-    nfrTotals.waived += parseNumber(item.waived);
-    nfrTotals.regularIncome += parseNumber(item.regularIncome);
+    nfrTotals.duplicate +=
+      parseNumber(item.duplicate);
 
-    nyvTotals.didNotAttendCA += parseNumber(item.didNotAttendCA);
-    nyvTotals.transferred += parseNumber(item.transferred);
+    nfrTotals.nasChildren +=
+      parseNumber(item.nasChildren);
+
+    nfrTotals.noEligible +=
+      parseNumber(item.noEligible);
+
+    nfrTotals.notInterested +=
+      parseNumber(item.notInterested);
+
+    nfrTotals.unlocated +=
+      parseNumber(item.unlocated);
+
+    nfrTotals.waived +=
+      parseNumber(item.waived);
+
+    nfrTotals.regularIncome +=
+      parseNumber(item.regularIncome);
+
+    nyvTotals.didNotAttendCA +=
+      parseNumber(item.didNotAttendCA);
+
+    nyvTotals.transferred +=
+      parseNumber(item.transferred);
 
     tableBody.innerHTML += `
       <tr>
@@ -351,7 +457,11 @@ function updateDashboard(data) {
     totalNotYetValidated.toLocaleString();
 
   document.getElementById('totalHH').innerText =
-    (totalForReg + totalNotForReg + totalNotYetValidated).toLocaleString();
+    (
+      totalForReg +
+      totalNotForReg +
+      totalNotYetValidated
+    ).toLocaleString();
 
   renderMunicipalityChart(
     municipalities,
@@ -372,9 +482,15 @@ function updateDashboard(data) {
 
 }
 
-function renderMunicipalityChart(labels, forReg, notForReg, nyv) {
+function renderMunicipalityChart(
+  labels,
+  forReg,
+  notForReg,
+  nyv
+) {
 
-  const ctx = document.getElementById('municipalityChart');
+  const ctx =
+    document.getElementById('municipalityChart');
 
   if (municipalityChart) {
     municipalityChart.destroy();
@@ -388,6 +504,7 @@ function renderMunicipalityChart(labels, forReg, notForReg, nyv) {
       labels:labels,
 
       datasets:[
+
         {
           label:'For Registration',
           data:forReg,
@@ -405,6 +522,7 @@ function renderMunicipalityChart(labels, forReg, notForReg, nyv) {
           data:nyv,
           backgroundColor:'#9e9e9e'
         }
+
       ]
     },
 
@@ -417,9 +535,14 @@ function renderMunicipalityChart(labels, forReg, notForReg, nyv) {
 
 }
 
-function renderStatusChart(forReg, notForReg, nyv) {
+function renderStatusChart(
+  forReg,
+  notForReg,
+  nyv
+) {
 
-  const ctx = document.getElementById('statusChart');
+  const ctx =
+    document.getElementById('statusChart');
 
   if (statusChart) {
     statusChart.destroy();
@@ -430,6 +553,7 @@ function renderStatusChart(forReg, notForReg, nyv) {
     type:'doughnut',
 
     data:{
+
       labels:[
         'For Registration',
         'Not For Registration',
@@ -437,13 +561,19 @@ function renderStatusChart(forReg, notForReg, nyv) {
       ],
 
       datasets:[{
-        data:[forReg, notForReg, nyv],
+
+        data:[
+          forReg,
+          notForReg,
+          nyv
+        ],
 
         backgroundColor:[
           '#4CAF50',
           '#ff8a80',
           '#9e9e9e'
         ]
+
       }]
     },
 
@@ -458,7 +588,8 @@ function renderStatusChart(forReg, notForReg, nyv) {
 
 function renderNFRBreakdownChart(data) {
 
-  const ctx = document.getElementById('nfrBreakdownChart');
+  const ctx =
+    document.getElementById('nfrBreakdownChart');
 
   if (nfrBreakdownChart) {
     nfrBreakdownChart.destroy();
@@ -469,6 +600,7 @@ function renderNFRBreakdownChart(data) {
     type:'bar',
 
     data:{
+
       labels:[
         'Duplicate',
         'NAS Children',
@@ -480,6 +612,7 @@ function renderNFRBreakdownChart(data) {
       ],
 
       datasets:[{
+
         label:'Count',
 
         data:[
@@ -493,6 +626,7 @@ function renderNFRBreakdownChart(data) {
         ],
 
         backgroundColor:'#ff8a80'
+
       }]
     },
 
@@ -507,7 +641,8 @@ function renderNFRBreakdownChart(data) {
 
 function renderNYVBreakdownChart(data) {
 
-  const ctx = document.getElementById('nyvBreakdownChart');
+  const ctx =
+    document.getElementById('nyvBreakdownChart');
 
   if (nyvBreakdownChart) {
     nyvBreakdownChart.destroy();
@@ -518,12 +653,14 @@ function renderNYVBreakdownChart(data) {
     type:'doughnut',
 
     data:{
+
       labels:[
         'Did Not Attend CA',
         'Transferred'
       ],
 
       datasets:[{
+
         data:[
           data.didNotAttendCA,
           data.transferred
@@ -533,6 +670,7 @@ function renderNYVBreakdownChart(data) {
           '#9e9e9e',
           '#607d8b'
         ]
+
       }]
     },
 
@@ -557,13 +695,16 @@ function parseNumber(value){
 
   const parsed = Number(value);
 
-  return Number.isNaN(parsed) ? 0 : parsed;
+  return Number.isNaN(parsed)
+    ? 0
+    : parsed;
 
 }
 
 function showError(message){
 
-  const errorBox = document.getElementById('errorBox');
+  const errorBox =
+    document.getElementById('errorBox');
 
   errorBox.style.display = 'block';
 
@@ -573,7 +714,8 @@ function showError(message){
 
 function hideError(){
 
-  const errorBox = document.getElementById('errorBox');
+  const errorBox =
+    document.getElementById('errorBox');
 
   errorBox.style.display = 'none';
 
@@ -602,4 +744,3 @@ setInterval(loadDashboard, 60000);
 
 </body>
 </html>
-```
