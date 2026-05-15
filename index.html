@@ -379,7 +379,21 @@ function populateClusterFilter(data) {
 
   });
 
-  select.addEventListener('change', loadDashboard);
+  if (!select.dataset.listenerAdded) {
+
+    select.addEventListener('change', () => {
+
+      document.getElementById(
+        'municipalityFilter'
+      ).value = 'ALL';
+
+      loadDashboard();
+
+    });
+
+    select.dataset.listenerAdded = 'true';
+
+  }
 
 }
 
@@ -387,6 +401,8 @@ function populateMunicipalityFilter(data) {
 
   const select =
     document.getElementById('municipalityFilter');
+
+  const currentValue = select.value;
 
   select.innerHTML =
     '<option value="ALL">All Municipalities</option>';
@@ -407,17 +423,39 @@ function populateMunicipalityFilter(data) {
 
   filteredMunicipalities.forEach(item => {
 
-    const option = document.createElement('option');
+    const option =
+      document.createElement('option');
 
-    option.value = item.municipality;
+    option.value =
+      item.municipality;
 
-    option.textContent = item.municipality;
+    option.textContent =
+      item.municipality;
 
     select.appendChild(option);
 
   });
 
-  select.addEventListener('change', loadDashboard);
+  const municipalityExists =
+    [...select.options].some(
+      option => option.value === currentValue
+    );
+
+  select.value =
+    municipalityExists
+      ? currentValue
+      : 'ALL';
+
+  if (!select.dataset.listenerAdded) {
+
+    select.addEventListener(
+      'change',
+      loadDashboard
+    );
+
+    select.dataset.listenerAdded = 'true';
+
+  }
 
 }
 
@@ -795,19 +833,6 @@ function hideError(){
   errorBox.innerText = '';
 
 }
-
-function runTests(){
-
-  console.assert(parseNumber('123') === 123);
-  console.assert(parseNumber('') === 0);
-  console.assert(parseNumber(null) === 0);
-  console.assert(parseNumber('abc') === 0);
-
-  console.log('Tests Passed');
-
-}
-
-runTests();
 
 loadDashboard();
 
