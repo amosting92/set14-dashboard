@@ -1,3 +1,4 @@
+Ako lang to, si Lio :D
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,6 +176,18 @@
 
     <div class="filter-box">
 
+      <label>Cluster</label>
+
+      <select id="clusterFilter">
+
+        <option value="ALL">All Clusters</option>
+
+      </select>
+
+    </div>
+
+    <div class="filter-box">
+
       <label>Municipality</label>
 
       <select id="municipalityFilter">
@@ -248,6 +261,7 @@
       <thead>
         <tr>
           <th>Municipality</th>
+          <th>Cluster</th>
           <th>For Reg</th>
           <th>Not For Reg</th>
           <th>Not Yet Validated</th>
@@ -299,17 +313,33 @@ async function loadDashboard() {
 
     });
 
+    populateClusterFilter(data);
+
     populateMunicipalityFilter(data);
+
+    const selectedCluster =
+      document.getElementById('clusterFilter').value;
 
     const selectedMunicipality =
       document.getElementById('municipalityFilter').value;
 
-    const filteredData =
-      selectedMunicipality === 'ALL'
-        ? data
-        : data.filter(item =>
-            item.municipality === selectedMunicipality
-          );
+    let filteredData = data;
+
+    if (selectedCluster !== 'ALL') {
+
+      filteredData = filteredData.filter(item =>
+        item.cluster === selectedCluster
+      );
+
+    }
+
+    if (selectedMunicipality !== 'ALL') {
+
+      filteredData = filteredData.filter(item =>
+        item.municipality === selectedMunicipality
+      );
+
+    }
 
     updateDashboard(filteredData);
 
@@ -326,16 +356,57 @@ async function loadDashboard() {
 
 }
 
-function populateMunicipalityFilter(data) {
+function populateClusterFilter(data) {
 
   const select =
-    document.getElementById('municipalityFilter');
+    document.getElementById('clusterFilter');
 
   if (select.options.length > 1) {
     return;
   }
 
-  data.forEach(item => {
+  const uniqueClusters =
+    [...new Set(data.map(item => item.cluster))];
+
+  uniqueClusters.forEach(cluster => {
+
+    const option = document.createElement('option');
+
+    option.value = cluster;
+
+    option.textContent = cluster;
+
+    select.appendChild(option);
+
+  });
+
+  select.addEventListener('change', loadDashboard);
+
+}
+
+function populateMunicipalityFilter(data) {
+
+  const select =
+    document.getElementById('municipalityFilter');
+
+  select.innerHTML =
+    '<option value="ALL">All Municipalities</option>';
+
+  const selectedCluster =
+    document.getElementById('clusterFilter').value;
+
+  let filteredMunicipalities = data;
+
+  if (selectedCluster !== 'ALL') {
+
+    filteredMunicipalities =
+      data.filter(item =>
+        item.cluster === selectedCluster
+      );
+
+  }
+
+  filteredMunicipalities.forEach(item => {
 
     const option = document.createElement('option');
 
@@ -385,6 +456,8 @@ function updateDashboard(data) {
   data.forEach(item => {
 
     const municipality = item.municipality;
+
+    const cluster = item.cluster;
 
     const forReg =
       parseNumber(item.forReg);
@@ -438,6 +511,7 @@ function updateDashboard(data) {
     tableBody.innerHTML += `
       <tr>
         <td>${municipality}</td>
+        <td>${cluster}</td>
         <td>${forReg.toLocaleString()}</td>
         <td>${notForReg.toLocaleString()}</td>
         <td>${notYetValidated.toLocaleString()}</td>
