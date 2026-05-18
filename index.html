@@ -674,23 +674,47 @@ const COLORS = {
   gray:  '#9ca3af',
   blue:  '#3b82f6'
 };
-
+  
 const tooltipPlugin = {
   plugins: {
     tooltip: {
       callbacks: {
         label: ctx => {
-          const val = ctx.parsed.y ?? ctx.parsed ?? 0;
+
+          let val = 0;
+
+          if (typeof ctx.parsed === 'object') {
+
+            val =
+              ctx.parsed.x ??
+              ctx.parsed.y ??
+              0;
+
+          } else {
+
+            val = ctx.parsed ?? 0;
+
+          }
+
           return ` ${ctx.dataset.label || ctx.label}: ${Number(val).toLocaleString()}`;
+
         }
       },
       backgroundColor: '#1a1a1a',
       padding: 10,
       cornerRadius: 8,
-      bodyFont: { family: "'DM Mono', monospace", size: 12 }
+      bodyFont: {
+        family: "'DM Mono', monospace",
+        size: 12
+      }
     },
+
     legend: {
-      labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10 }
+      labels: {
+        padding: 16,
+        usePointStyle: true,
+        pointStyleWidth: 10
+      }
     }
   }
 };
